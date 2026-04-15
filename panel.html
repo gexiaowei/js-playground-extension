@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>JavaScript Playground</title>
+  <link rel="stylesheet" href="lib/codemirror/lib/codemirror.css">
+  <link rel="stylesheet" href="lib/codemirror/theme/monokai.css">
+  <link rel="stylesheet" href="lib/codemirror/addon/hint/show-hint.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      background: #1e1e1e;
+      color: #d4d4d4;
+    }
+    
+    #toolbar {
+      display: flex;
+      padding: 10px 12px;
+      background: linear-gradient(180deg, #2d2d30 0%, #252526 100%);
+      border-bottom: 1px solid #3e3e42;
+      gap: 8px;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+    
+    .toolbar-group {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    
+    .toolbar-divider {
+      width: 1px;
+      height: 20px;
+      background: #3e3e42;
+      margin: 0 4px;
+    }
+    
+    button {
+      padding: 6px 14px;
+      background: linear-gradient(180deg, #0e639c 0%, #1177bb 100%);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+    
+    button:hover {
+      background: linear-gradient(180deg, #1177bb 0%, #1388d4 100%);
+      transform: translateY(-1px);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+    }
+    
+    button:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    }
+    
+    button.secondary {
+      background: linear-gradient(180deg, #5a5a5a 0%, #6a6a6a 100%);
+    }
+    
+    button.secondary:hover {
+      background: linear-gradient(180deg, #6a6a6a 0%, #7a7a7a 100%);
+    }
+    
+    .status-text {
+      font-size: 12px;
+      color: #858585;
+      margin-left: auto;
+      padding: 0 8px;
+    }
+    
+    #editor-container {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .CodeMirror {
+      height: 100%;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    
+    #output-container {
+      display: flex;
+      flex-direction: column;
+      height: 200px;
+      background: #252526;
+      border-top: 1px solid #3e3e42;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    #output-header {
+      display: flex;
+      align-items: center;
+      padding: 6px 12px;
+      background: #2d2d30;
+      border-bottom: 1px solid #3e3e42;
+      font-size: 12px;
+      font-weight: 500;
+      color: #cccccc;
+    }
+    
+    #output {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    
+    .output-line {
+      margin-bottom: 6px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      padding: 2px 0;
+    }
+    
+    .output-error {
+      color: #f48771;
+    }
+    
+    .output-success {
+      color: #4ec9b0;
+    }
+    
+    .output-info {
+      color: #569cd6;
+    }
+    
+    .output-warn {
+      color: #dcdcaa;
+    }
+    
+    #output::-webkit-scrollbar {
+      width: 10px;
+    }
+    
+    #output::-webkit-scrollbar-track {
+      background: #1e1e1e;
+    }
+    
+    #output::-webkit-scrollbar-thumb {
+      background: #424242;
+      border-radius: 5px;
+    }
+    
+    #output::-webkit-scrollbar-thumb:hover {
+      background: #4e4e4e;
+    }
+    
+    .keyboard-hint {
+      font-size: 11px;
+      color: #858585;
+      margin-left: 8px;
+    }
+    
+    /* CodeMirror提示框样式优化 */
+    .CodeMirror-hints {
+      background: #252526;
+      border: 1px solid #3e3e42;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 13px;
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 10000;
+    }
+    
+    .CodeMirror-hint {
+      color: #d4d4d4;
+      padding: 4px 8px;
+      border-radius: 2px;
+    }
+    
+    .CodeMirror-hint-active {
+      background: #094771;
+      color: #ffffff;
+    }
+    
+    .CodeMirror-hint:hover {
+      background: #2a2d2e;
+    }
+    
+    .CodeMirror-hint-code {
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    }
+  </style>
+</head>
+<body>
+  <div id="toolbar">
+    <div class="toolbar-group">
+      <button id="run-btn">
+        ▶ 运行
+      </button>
+      <span class="keyboard-hint">Ctrl+Enter | Ctrl+Space提示</span>
+    </div>
+    <div class="toolbar-divider"></div>
+    <div class="toolbar-group">
+      <button id="format-btn" class="secondary">格式化</button>
+      <span class="keyboard-hint">Shift+Alt+F</span>
+    </div>
+    <div class="toolbar-divider"></div>
+    <div class="toolbar-group">
+      <button id="clear-btn" class="secondary">清空输出</button>
+    </div>
+    <div class="status-text" id="status-text">就绪</div>
+  </div>
+  <div id="editor-container"></div>
+  <div id="output-container">
+    <div id="output-header">输出</div>
+    <div id="output"></div>
+  </div>
+  
+  <script src="lib/codemirror/lib/codemirror.js"></script>
+  <script src="lib/codemirror/mode/javascript/javascript.js"></script>
+  <script src="lib/codemirror/addon/edit/closebrackets.js"></script>
+  <script src="lib/codemirror/addon/edit/matchbrackets.js"></script>
+  <script src="lib/codemirror/addon/hint/show-hint.js"></script>
+  <script src="lib/codemirror/addon/hint/javascript-hint.js"></script>
+  <script src="lib/codemirror/addon/hint/anyword-hint.js"></script>
+  <script src="lib/js-beautify/beautify.js"></script>
+  <script src="panel.js"></script>
+</body>
+</html>

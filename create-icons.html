@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>生成图标</title>
+</head>
+<body>
+  <h2>生成Chrome扩展图标</h2>
+  <p>点击下面的按钮生成图标文件</p>
+  <button onclick="generateIcons()">生成图标</button>
+  <div id="result"></div>
+  
+  <script>
+    function generateIcons() {
+      const sizes = [16, 48, 128];
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      
+      sizes.forEach(size => {
+        canvas.width = size;
+        canvas.height = size;
+        
+        // 绘制蓝色背景
+        ctx.fillStyle = '#007acc';
+        ctx.fillRect(0, 0, size, size);
+        
+        // 绘制白色"JS"文字
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `bold ${size * 0.5}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('JS', size / 2, size / 2);
+        
+        // 转换为blob并下载
+        canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `icon${size}.png`;
+          a.click();
+          URL.revokeObjectURL(url);
+        });
+      });
+      
+      document.getElementById('result').innerHTML = '<p style="color: green;">图标已生成！请将下载的文件保存到扩展目录中。</p>';
+    }
+  </script>
+</body>
+</html>
