@@ -31,7 +31,11 @@ Firefox:
 
 1. 安装依赖：`pnpm install`
 2. 执行构建：`pnpm build:crx`
-3. 构建产物会输出到 `dist/javascript-playground.crx` 和 `dist/javascript-playground.zip`
+3. 构建产物会输出到：
+   - `dist/javascript-playground-store.zip`：提交 **Chrome 网上应用店**（清单不含 `update_url`）
+   - `dist/javascript-playground.zip` / `dist/javascript-playground.crx` / `dist/updates.xml`：**自托管更新**（清单含 `update_url`，与 GitHub Release 搭配）
+
+仓库根目录的 `manifest.json` 与商店包一致；`manifest.selfhosted.json` 仅用于上述自托管构建。
 
 首次构建会自动生成签名私钥 `.keys/key.pem`。后续发布更新时必须保留这把私钥，否则扩展 ID 会变化，旧版本无法原位升级。
 
@@ -56,11 +60,11 @@ Firefox:
 
 - 更新 `package.json` 版本号
 - 同步 `manifest.json` 里的扩展版本号
-- 重新生成 `dist/javascript-playground.crx` 和 `dist/javascript-playground.zip`
+- 重新生成 `dist/javascript-playground-store.zip`、`dist/javascript-playground.crx` 和 `dist/javascript-playground.zip`
 - 创建 release commit 和 Git tag
 
 当前配置不会执行 npm 发布，也不会由 `release-it` 直接创建 GitHub Release。
-GitHub Release 由 tag push 触发的 GitHub Actions workflow 创建，并自动上传 `dist/javascript-playground.crx` 和 `dist/javascript-playground.zip`。
+GitHub Release 由 tag push 触发的 GitHub Actions workflow 创建，并自动上传商店 zip、自托管 zip / crx 与 `updates.xml`。
 GitHub Actions 中的 `upload-artifact` 仍然会保留一份 workflow 级产物，便于在运行记录里下载。
 
 ## 使用方法

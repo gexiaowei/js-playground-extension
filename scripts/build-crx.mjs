@@ -16,6 +16,7 @@ const keyPath = path.join(keyDir, 'key.pem');
 const extensionSlug = 'javascript-playground';
 const crxOutputPath = path.join(distDir, `${extensionSlug}.crx`);
 const zipOutputPath = path.join(distDir, `${extensionSlug}.zip`);
+const zipStoreOutputPath = path.join(distDir, `${extensionSlug}-store.zip`);
 const updatesOutputPath = path.join(distDir, 'updates.xml');
 
 const excludedEntries = new Set([
@@ -31,7 +32,9 @@ const excludedEntries = new Set([
   'package.json',
   'pnpm-lock.yaml',
   'README.md',
-  'scripts'
+  'scripts',
+  'manifest.json',
+  'manifest.selfhosted.json'
 ]);
 
 async function pathExists(targetPath) {
@@ -63,7 +66,7 @@ function run(command, args) {
   });
 }
 
-async function stageExtensionFiles() {
+async function stageExtensionFiles(manifestSourceBasename) {
   await rm(buildDir, { recursive: true, force: true });
   await mkdir(stageDir, { recursive: true });
 
@@ -78,6 +81,11 @@ async function stageExtensionFiles() {
     const destinationPath = path.join(stageDir, entry.name);
     await cp(sourcePath, destinationPath, { recursive: true });
   }
+
+  const manifestSourcePath = path.join(rootDir, manifestSourceBasename);
+  const manifestDestPath = path.join(stageDir, 'manifest.json');
+  const manifestContent = await readFile(manifestSourcePath, 'utf8');
+  await writeFile(manifestDestPath, manifestContent);
 }
 
 async function ensurePrivateKey() {
@@ -135,20 +143,35 @@ async function writeUpdateManifest(extension) {
 async function buildCrx() {
   await mkdir(distDir, { recursive: true });
   await run('pnpm', ['build:icons']);
-  await stageExtensionFiles();
   await ensurePrivateKey();
 
-  console.log(`Packing extension from ${path.relative(rootDir, stageDir)}`);
-
   const privateKey = await readFile(keyPath);
-  const extension = new ChromeExtension({
+
+  await stageExtensionFiles('manifest.json');
+  console.log(`Packing store zip from ${path.relative(rootDir, stageDir)} (manifest.json)`);
+
+  let extension = new ChromeExtension({
     privateKey,
     rootDirectory: stageDir,
     version: 3
   });
 
   await extension.load();
-  const zipBuffer = await extension.loadContents();
+  let zipBuffer = await extension.loadContents();
+  await writeFile(zipStoreOutputPath, zipBuffer);
+  console.log(`Created ${path.relative(rootDir, zipStoreOutputPath)}`);
+
+  await stageExtensionFiles('manifest.selfhosted.json');
+  console.log(`Packing self-hosted .crx / .zip from ${path.relative(rootDir, stageDir)} (manifest.selfhosted.json)`);
+
+  extension = new ChromeExtension({
+    privateKey,
+    rootDirectory: stageDir,
+    version: 3
+  });
+
+  await extension.load();
+  zipBuffer = await extension.loadContents();
   const crxBuffer = await extension.pack(zipBuffer);
   await writeUpdateManifest(extension);
 
