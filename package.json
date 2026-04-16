@@ -22,13 +22,7 @@
       "tagName": "v${version}"
     },
     "github": {
-      "release": true,
-      "web": true,
-      "releaseName": "v${version}",
-      "assets": [
-        "dist/javascript-playground.crx",
-        "dist/javascript-playground.zip"
-      ]
+      "release": false
     },
     "npm": {
       "publish": false

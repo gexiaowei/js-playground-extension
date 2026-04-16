@@ -58,10 +58,10 @@ Firefox:
 - 同步 `manifest.json` 里的扩展版本号
 - 重新生成 `dist/javascript-playground.crx` 和 `dist/javascript-playground.zip`
 - 创建 release commit 和 Git tag
-- 打开预填好的 GitHub Release 页面，由你手动确认发布
-- `dist/javascript-playground.crx` 和 `dist/javascript-playground.zip` 需要在 GitHub 页面中手动上传
 
-当前配置不会执行 npm 发布，也不会通过 GitHub API 自动创建 Release。
+当前配置不会执行 npm 发布，也不会由 `release-it` 直接创建 GitHub Release。
+GitHub Release 由 tag push 触发的 GitHub Actions workflow 创建，并自动上传 `dist/javascript-playground.crx` 和 `dist/javascript-playground.zip`。
+GitHub Actions 中的 `upload-artifact` 仍然会保留一份 workflow 级产物，便于在运行记录里下载。
 
 ## 使用方法
 
