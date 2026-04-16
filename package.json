@@ -29,8 +29,7 @@
     },
     "hooks": {
       "after:bump": [
-        "pnpm sync:manifest-version",
-        "pnpm build:crx"
+        "pnpm sync:manifest-version"
       ]
     }
   },
