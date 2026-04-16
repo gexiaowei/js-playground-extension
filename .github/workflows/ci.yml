@@ -3,7 +3,7 @@ name: CI
 on:
   push:
     tags:
-      - 'v*'
+      - "v*"
 
 permissions:
   contents: write
@@ -22,8 +22,15 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           cache: pnpm
+
+      - name: Debug package manager inputs
+        run: |
+          node --version
+          pnpm --version
+          sed -n '1,24p' pnpm-lock.yaml
+          grep -nE '^(lockfileVersion:|importers:|packages:|snapshots:|---|\.\.\.)$' pnpm-lock.yaml || true
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
