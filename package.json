@@ -2,6 +2,10 @@
   "name": "javascript-playground-extension",
   "private": true,
   "version": "1.3.0",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:gexiaowei/js-playground-extension.git"
+  },
   "scripts": {
     "lint": "eslint devtools.js panel.js scripts/*.mjs",
     "build:icons": "node scripts/build-icons.mjs",

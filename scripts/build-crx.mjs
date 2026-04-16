@@ -16,6 +16,7 @@ const keyPath = path.join(keyDir, 'key.pem');
 const extensionSlug = 'javascript-playground';
 const crxOutputPath = path.join(distDir, `${extensionSlug}.crx`);
 const zipOutputPath = path.join(distDir, `${extensionSlug}.zip`);
+const updatesOutputPath = path.join(distDir, 'updates.xml');
 
 const excludedEntries = new Set([
   '.DS_Store',
@@ -86,8 +87,49 @@ async function ensurePrivateKey() {
     return;
   }
 
+  if (process.env.CI) {
+    throw new Error(`Missing private key at ${path.relative(rootDir, keyPath)}. Set CHROME_EXTENSION_PRIVATE_KEY_B64 in GitHub Actions secrets.`);
+  }
+
   console.log(`Generating private key at ${path.relative(rootDir, keyPath)}`);
   await run('pnpm', ['exec', 'crx', 'keygen', keyDir]);
+}
+
+function getRepositorySlug(packageJson) {
+  const repository = typeof packageJson.repository === 'string'
+    ? packageJson.repository
+    : packageJson.repository?.url;
+
+  if (!repository) {
+    throw new Error('package.json is missing repository.url');
+  }
+
+  const sshMatch = repository.match(/github\.com:([^/]+\/[^/.]+)(?:\.git)?$/);
+  if (sshMatch) {
+    return sshMatch[1];
+  }
+
+  const httpsMatch = repository.match(/github\.com\/([^/]+\/[^/.]+)(?:\.git)?$/);
+  if (httpsMatch) {
+    return httpsMatch[1];
+  }
+
+  throw new Error(`Unsupported GitHub repository URL: ${repository}`);
+}
+
+function getReleaseTag(version) {
+  return process.env.GITHUB_REF_NAME || `v${version}`;
+}
+
+async function writeUpdateManifest(extension) {
+  const packageJson = JSON.parse(await readFile(path.join(rootDir, 'package.json'), 'utf8'));
+  const repositorySlug = process.env.GITHUB_REPOSITORY || getRepositorySlug(packageJson);
+  const tagName = getReleaseTag(extension.manifest.version);
+
+  extension.codebase = `https://github.com/${repositorySlug}/releases/download/${tagName}/${extensionSlug}.crx`;
+  const updateXml = extension.generateUpdateXML();
+  await writeFile(updatesOutputPath, updateXml);
+  console.log(`Created ${path.relative(rootDir, updatesOutputPath)}`);
 }
 
 async function buildCrx() {
@@ -108,6 +150,7 @@ async function buildCrx() {
   await extension.load();
   const zipBuffer = await extension.loadContents();
   const crxBuffer = await extension.pack(zipBuffer);
+  await writeUpdateManifest(extension);
 
   await writeFile(zipOutputPath, zipBuffer);
   await writeFile(crxOutputPath, crxBuffer);
