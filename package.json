@@ -1,7 +1,7 @@
 {
   "name": "javascript-playground-extension",
   "private": true,
-  "version": "1.2.3",
+  "version": "1.2.4",
   "scripts": {
     "lint": "eslint devtools.js panel.js scripts/*.mjs",
     "build:crx": "node scripts/build-crx.mjs",
