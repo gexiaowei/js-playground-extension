@@ -1,6 +1,38 @@
 let editor;
 let outputDiv;
 let statusText;
+const firefoxAPI = globalThis.browser;
+const chromeAPI = globalThis.chrome;
+
+function inspectedWindowEval(code, callback) {
+  if (firefoxAPI?.devtools?.inspectedWindow?.eval) {
+    firefoxAPI.devtools.inspectedWindow
+      .eval(code)
+      .then(([result, exceptionInfo]) => {
+        callback(result, exceptionInfo);
+      })
+      .catch((error) => {
+        callback(null, {
+          isError: true,
+          value: error?.message || String(error),
+          description: error?.stack || ''
+        });
+      });
+    return;
+  }
+
+  if (chromeAPI?.devtools?.inspectedWindow?.eval) {
+    chromeAPI.devtools.inspectedWindow.eval(code, callback);
+    return;
+  }
+
+  if (!firefoxAPI?.devtools?.inspectedWindow?.eval && !chromeAPI?.devtools?.inspectedWindow?.eval) {
+    callback(null, {
+      isError: true,
+      value: '当前浏览器不支持 devtools.inspectedWindow.eval'
+    });
+  }
+}
 
 // 增强的代码提示函数
 function enhancedHint(cm, options) {
@@ -13,7 +45,7 @@ function enhancedHint(cm, options) {
   let jsHint = null;
   try {
     jsHint = CodeMirror.hint.javascript(cm, options);
-  } catch (e) {
+  } catch {
     // 忽略错误，继续使用其他提示方式
   }
   
@@ -393,7 +425,7 @@ function runCode() {
     `;
     
     // 在页面上下文中执行代码
-    chrome.devtools.inspectedWindow.eval(wrappedCode, (result, exceptionInfo) => {
+    inspectedWindowEval(wrappedCode, (result, exceptionInfo) => {
       if (exceptionInfo) {
         addOutput('✗ 执行异常: ' + exceptionInfo.value, 'error');
         if (exceptionInfo.isError) {
@@ -419,12 +451,12 @@ function runCode() {
         
         // 显示返回值
         if (result.returnValue !== undefined) {
-          let returnStr = '';
+          let returnStr;
           try {
             returnStr = typeof result.returnValue === 'object' 
               ? JSON.stringify(result.returnValue, null, 2)
               : String(result.returnValue);
-          } catch(e) {
+          } catch {
             returnStr = String(result.returnValue);
           }
           addOutput(`返回值: ${returnStr}`, 'success');
@@ -477,9 +509,7 @@ function formatCode() {
     const code = editor.getValue();
     
     // 检查js-beautify是否可用（可能在window或全局作用域）
-    const beautify = typeof js_beautify !== 'undefined' ? js_beautify : 
-                     (typeof window !== 'undefined' && window.js_beautify) ? window.js_beautify :
-                     null;
+    const beautify = globalThis.js_beautify || globalThis.window?.js_beautify || null;
     
     if (!beautify) {
       addOutput('✗ js-beautify 未加载，请检查文件路径', 'error');
@@ -518,7 +548,7 @@ function formatCode() {
     // 恢复光标位置（如果可能）
     try {
       editor.setCursor(cursor);
-    } catch (e) {
+    } catch {
       // 如果光标位置无效，移动到开头
       editor.setCursor(0, 0);
     }
@@ -536,4 +566,3 @@ function formatCode() {
     }
   }
 }
-

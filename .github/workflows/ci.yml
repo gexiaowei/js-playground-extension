@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+
+jobs:
+  lint-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run lint
+        run: pnpm lint
+
+      - name: Build extension
+        run: pnpm build:crx
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: javascript-playground-${{ github.sha }}
+          path: |
+            dist/javascript-playground.crx
+            dist/javascript-playground.zip
+          if-no-files-found: error
