@@ -1,10 +1,11 @@
 const firefoxAPI = globalThis.browser;
 const chromeAPI = globalThis.chrome;
+const panelIconPath = "/icons/logo.svg";
 
 function createDevtoolsPanel() {
   if (firefoxAPI?.devtools?.panels?.create) {
     firefoxAPI.devtools.panels
-      .create("Playground", null, "panel.html")
+      .create("Playground", panelIconPath, "panel.html")
       .then(() => {
         console.log("Playground 面板已创建");
       })
@@ -21,11 +22,11 @@ function createDevtoolsPanel() {
 
   chromeAPI.devtools.panels.create(
     "Playground",
-    null,
+    panelIconPath,
     "panel.html",
     () => {
       console.log("Playground 面板已创建");
-    }
+    },
   );
 }
 

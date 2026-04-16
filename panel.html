@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8">
   <title>JavaScript Playground</title>
@@ -7,116 +8,232 @@
   <link rel="stylesheet" href="lib/codemirror/theme/monokai.css">
   <link rel="stylesheet" href="lib/codemirror/addon/hint/show-hint.css">
   <style>
+    :root {
+      color-scheme: dark light;
+      --app-bg: #1e1e1e;
+      --app-text: #d4d4d4;
+      --toolbar-bg: linear-gradient(180deg, #2d2d30 0%, #252526 100%);
+      --panel-bg: #252526;
+      --panel-bg-elevated: #2d2d30;
+      --border-color: #3e3e42;
+      --muted-text: #858585;
+      --brand-title: #f3f4f6;
+      --brand-subtitle: #9ca3af;
+      --button-primary: linear-gradient(180deg, #0e639c 0%, #1177bb 100%);
+      --button-primary-hover: linear-gradient(180deg, #1177bb 0%, #1388d4 100%);
+      --button-secondary: linear-gradient(180deg, #5a5a5a 0%, #6a6a6a 100%);
+      --button-secondary-hover: linear-gradient(180deg, #6a6a6a 0%, #7a7a7a 100%);
+      --button-primary-text: #ffffff;
+      --button-secondary-text: #ffffff;
+      --button-secondary-border: transparent;
+      --shadow-soft: 0 2px 4px rgba(0, 0, 0, 0.2);
+      --shadow-strong: 0 4px 12px rgba(0, 0, 0, 0.5);
+      --code-bg: #272822;
+      --code-text: #f8f8f2;
+      --code-gutter-bg: #272822;
+      --code-gutter-text: #8f908a;
+      --hint-bg: #252526;
+      --hint-border: #3e3e42;
+      --hint-text: #d4d4d4;
+      --hint-active-bg: #094771;
+      --hint-active-text: #ffffff;
+      --hint-hover-bg: #2a2d2e;
+      --scrollbar-track: #1e1e1e;
+      --scrollbar-thumb: #424242;
+      --scrollbar-thumb-hover: #4e4e4e;
+      --output-error: #f48771;
+      --output-success: #4ec9b0;
+      --output-info: #569cd6;
+      --output-warn: #dcdcaa;
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --app-bg: #f6f8fb;
+        --app-text: #1f2937;
+        --toolbar-bg: linear-gradient(180deg, #ffffff 0%, #eef2f7 100%);
+        --panel-bg: #ffffff;
+        --panel-bg-elevated: #f3f6fb;
+        --border-color: #d7deea;
+        --muted-text: #6b7280;
+        --brand-title: #0f172a;
+        --brand-subtitle: #64748b;
+        --button-primary: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+        --button-primary-hover: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
+        --button-secondary: linear-gradient(180deg, #ffffff 0%, #edf2f8 100%);
+        --button-secondary-hover: linear-gradient(180deg, #f8fbff 0%, #e7eef7 100%);
+        --button-primary-text: #ffffff;
+        --button-secondary-text: #334155;
+        --button-secondary-border: #cbd5e1;
+        --shadow-soft: 0 2px 8px rgba(15, 23, 42, 0.08);
+        --shadow-strong: 0 8px 20px rgba(15, 23, 42, 0.12);
+        --code-bg: #fbfdff;
+        --code-text: #0f172a;
+        --code-gutter-bg: #f1f5f9;
+        --code-gutter-text: #64748b;
+        --hint-bg: #ffffff;
+        --hint-border: #d7deea;
+        --hint-text: #0f172a;
+        --hint-active-bg: #dbeafe;
+        --hint-active-text: #1d4ed8;
+        --hint-hover-bg: #eff6ff;
+        --scrollbar-track: #eef2f7;
+        --scrollbar-thumb: #c2cbd8;
+        --scrollbar-thumb-hover: #aeb8c8;
+        --output-error: #dc2626;
+        --output-success: #059669;
+        --output-info: #2563eb;
+        --output-warn: #b45309;
+      }
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
       display: flex;
       flex-direction: column;
       height: 100vh;
       overflow: hidden;
-      background: #1e1e1e;
-      color: #d4d4d4;
+      background: var(--app-bg);
+      color: var(--app-text);
     }
-    
+
     #toolbar {
       display: flex;
       padding: 10px 12px;
-      background: linear-gradient(180deg, #2d2d30 0%, #252526 100%);
-      border-bottom: 1px solid #3e3e42;
+      background: var(--toolbar-bg);
+      border-bottom: 1px solid var(--border-color);
       gap: 8px;
       align-items: center;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--shadow-soft);
     }
-    
+
+    .toolbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-right: 8px;
+      padding-right: 12px;
+      border-right: 1px solid var(--border-color);
+    }
+
+    .toolbar-brand img {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    .toolbar-brand-text {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .toolbar-brand-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--brand-title);
+      letter-spacing: 0.02em;
+    }
+
+    .toolbar-brand-subtitle {
+      font-size: 10px;
+      color: var(--brand-subtitle);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
     .toolbar-group {
       display: flex;
       gap: 6px;
       align-items: center;
     }
-    
+
     .toolbar-divider {
       width: 1px;
       height: 20px;
-      background: #3e3e42;
+      background: var(--border-color);
       margin: 0 4px;
     }
-    
+
     button {
       padding: 6px 14px;
-      background: linear-gradient(180deg, #0e639c 0%, #1177bb 100%);
-      color: white;
-      border: none;
+      background: var(--button-primary);
+      color: var(--button-primary-text);
+      border: 1px solid transparent;
       border-radius: 4px;
       cursor: pointer;
       font-size: 13px;
       font-weight: 500;
       transition: all 0.2s ease;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+      box-shadow: var(--shadow-soft);
     }
-    
+
     button:hover {
-      background: linear-gradient(180deg, #1177bb 0%, #1388d4 100%);
+      background: var(--button-primary-hover);
       transform: translateY(-1px);
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+      box-shadow: var(--shadow-soft);
     }
-    
+
     button:active {
       transform: translateY(0);
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      box-shadow: none;
     }
-    
+
     button.secondary {
-      background: linear-gradient(180deg, #5a5a5a 0%, #6a6a6a 100%);
+      background: var(--button-secondary);
+      color: var(--button-secondary-text);
+      border-color: var(--button-secondary-border);
     }
-    
+
     button.secondary:hover {
-      background: linear-gradient(180deg, #6a6a6a 0%, #7a7a7a 100%);
+      background: var(--button-secondary-hover);
     }
-    
+
     .status-text {
       font-size: 12px;
-      color: #858585;
+      color: var(--muted-text);
       margin-left: auto;
       padding: 0 8px;
     }
-    
+
     #editor-container {
       flex: 1;
       position: relative;
       overflow: hidden;
     }
-    
+
     .CodeMirror {
       height: 100%;
       font-size: 14px;
       line-height: 1.6;
     }
-    
+
     #output-container {
       display: flex;
       flex-direction: column;
       height: 200px;
-      background: #252526;
-      border-top: 1px solid #3e3e42;
-      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.3);
+      background: var(--panel-bg);
+      border-top: 1px solid var(--border-color);
+      box-shadow: var(--shadow-soft);
     }
-    
+
     #output-header {
       display: flex;
       align-items: center;
       padding: 6px 12px;
-      background: #2d2d30;
-      border-bottom: 1px solid #3e3e42;
+      background: var(--panel-bg-elevated);
+      border-bottom: 1px solid var(--border-color);
       font-size: 12px;
       font-weight: 500;
-      color: #cccccc;
+      color: var(--app-text);
     }
-    
+
     #output {
       flex: 1;
       padding: 12px;
@@ -124,89 +241,126 @@
       font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
       font-size: 13px;
       line-height: 1.6;
+      background: var(--panel-bg);
+      color: var(--app-text);
     }
-    
+
     .output-line {
       margin-bottom: 6px;
       white-space: pre-wrap;
       word-break: break-all;
       padding: 2px 0;
     }
-    
+
     .output-error {
-      color: #f48771;
+      color: var(--output-error);
     }
-    
+
     .output-success {
-      color: #4ec9b0;
+      color: var(--output-success);
     }
-    
+
     .output-info {
-      color: #569cd6;
+      color: var(--output-info);
     }
-    
+
     .output-warn {
-      color: #dcdcaa;
+      color: var(--output-warn);
     }
-    
+
     #output::-webkit-scrollbar {
       width: 10px;
     }
-    
+
     #output::-webkit-scrollbar-track {
-      background: #1e1e1e;
+      background: var(--scrollbar-track);
     }
-    
+
     #output::-webkit-scrollbar-thumb {
-      background: #424242;
+      background: var(--scrollbar-thumb);
       border-radius: 5px;
     }
-    
+
     #output::-webkit-scrollbar-thumb:hover {
-      background: #4e4e4e;
+      background: var(--scrollbar-thumb-hover);
     }
-    
+
     .keyboard-hint {
       font-size: 11px;
-      color: #858585;
+      color: var(--muted-text);
       margin-left: 8px;
+    }
+
+    .CodeMirror {
+      background: var(--code-bg);
+      color: var(--code-text);
+    }
+
+    .CodeMirror-gutters {
+      background: var(--code-gutter-bg);
+      border-right: 1px solid var(--border-color);
+    }
+
+    .CodeMirror-linenumber {
+      color: var(--code-gutter-text);
+    }
+
+    .CodeMirror-cursor {
+      border-left: 1px solid var(--code-text);
+    }
+
+    .CodeMirror-selected {
+      background: color-mix(in srgb, var(--output-info) 18%, transparent);
+    }
+
+    .CodeMirror-matchingbracket {
+      text-decoration: underline;
+      color: var(--output-success) !important;
     }
     
     /* CodeMirror提示框样式优化 */
     .CodeMirror-hints {
-      background: #252526;
-      border: 1px solid #3e3e42;
+      background: var(--hint-bg);
+      border: 1px solid var(--hint-border);
       border-radius: 4px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      box-shadow: var(--shadow-strong);
       font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
       font-size: 13px;
       max-height: 300px;
       overflow-y: auto;
       z-index: 10000;
     }
-    
+
     .CodeMirror-hint {
-      color: #d4d4d4;
+      color: var(--hint-text);
       padding: 4px 8px;
       border-radius: 2px;
     }
-    
+
     .CodeMirror-hint-active {
-      background: #094771;
-      color: #ffffff;
+      background: var(--hint-active-bg);
+      color: var(--hint-active-text);
     }
-    
+
     .CodeMirror-hint:hover {
-      background: #2a2d2e;
+      background: var(--hint-hover-bg);
     }
-    
+
     .CodeMirror-hint-code {
       font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
     }
   </style>
 </head>
+
 <body>
   <div id="toolbar">
+    <div class="toolbar-brand">
+      <img src="icons/logo.svg" alt="JavaScript Playground logo">
+      <div class="toolbar-brand-text">
+        <span class="toolbar-brand-title">JavaScript Playground</span>
+        <span class="toolbar-brand-subtitle">DevTools Panel</span>
+      </div>
+    </div>
     <div class="toolbar-group">
       <button id="run-btn">
         ▶ 运行
@@ -229,7 +383,7 @@
     <div id="output-header">输出</div>
     <div id="output"></div>
   </div>
-  
+
   <script src="lib/codemirror/lib/codemirror.js"></script>
   <script src="lib/codemirror/mode/javascript/javascript.js"></script>
   <script src="lib/codemirror/addon/edit/closebrackets.js"></script>
@@ -240,4 +394,5 @@
   <script src="lib/js-beautify/beautify.js"></script>
   <script src="panel.js"></script>
 </body>
+
 </html>

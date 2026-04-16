@@ -1,6 +1,7 @@
 let editor;
 let outputDiv;
 let statusText;
+const colorSchemeMediaQuery = globalThis.matchMedia?.('(prefers-color-scheme: dark)') || null;
 const firefoxAPI = globalThis.browser;
 const chromeAPI = globalThis.chrome;
 
@@ -217,6 +218,18 @@ function enhancedHint(cm, options) {
   };
 }
 
+function getPreferredEditorTheme() {
+  return colorSchemeMediaQuery?.matches ? 'monokai' : 'default';
+}
+
+function syncEditorTheme() {
+  if (!editor) {
+    return;
+  }
+
+  editor.setOption('theme', getPreferredEditorTheme());
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   outputDiv = document.getElementById('output');
   statusText = document.getElementById('status-text');
@@ -249,7 +262,7 @@ console.log('页面标题:', title);
 //   .then(data => console.log(data));
 `,
     mode: { name: 'javascript', json: true },
-    theme: 'monokai',
+    theme: getPreferredEditorTheme(),
     lineNumbers: true,
     indentUnit: 2,
     tabSize: 2,
@@ -327,6 +340,10 @@ console.log('页面标题:', title);
   editor.on('change', () => {
     updateStatus('已修改');
   });
+
+  if (colorSchemeMediaQuery) {
+    colorSchemeMediaQuery.addEventListener('change', syncEditorTheme);
+  }
 
   addOutput('✓ Playground 已就绪，可以开始编写代码了！', 'success');
   updateStatus('就绪');

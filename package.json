@@ -4,6 +4,7 @@
   "version": "1.2.6",
   "scripts": {
     "lint": "eslint devtools.js panel.js scripts/*.mjs",
+    "build:icons": "node scripts/build-icons.mjs",
     "build:crx": "node scripts/build-crx.mjs",
     "sync:manifest-version": "node scripts/sync-manifest-version.mjs",
     "release": "release-it",
@@ -11,6 +12,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@resvg/resvg-js": "^2.6.2",
     "crx": "^5.0.1",
     "eslint": "^10.2.0",
     "globals": "^17.5.0",

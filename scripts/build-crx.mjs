@@ -92,6 +92,7 @@ async function ensurePrivateKey() {
 
 async function buildCrx() {
   await mkdir(distDir, { recursive: true });
+  await run('pnpm', ['build:icons']);
   await stageExtensionFiles();
   await ensurePrivateKey();
 
